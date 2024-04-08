@@ -14,7 +14,10 @@ export const useStore = create<BoundState>()(
       })),
       { name: 'liveshorts-store' },
     ),
-    { name: 'liveshorts-store' },
+    {
+      name: 'liveshorts-store',
+      enabled: process.env.NODE_ENV !== 'production',
+    },
   ),
 );
 
