@@ -1,21 +1,11 @@
-import { createStore } from 'zustand-x';
+import { create, SlicePattern } from 'zustand';
+import { type BoundState } from '../rootStore';
 
-const initState: UserState = {};
-
-export const useUserStore = createStore('user')(initState, {
-  immer: {
-    enabledAutoFreeze: true,
+export const createUserSlice: SlicePattern<UserState> = (set) => ({
+  me: {
+    id: 1,
+    userId: 'hwpark',
+    name: 'Bob Park',
   },
-  devtools: {
-    enabled: true,
-  },
-  persist: {
-    enabled: true,
-  },
-}).extendActions((set, get, api) => ({
-  updateMe: (user: User) => {
-    set.state((draft) => {
-      draft.me = user;
-    });
-  },
-}));
+  updateMe: (user: User) => set((state) => ({ me: user })),
+});

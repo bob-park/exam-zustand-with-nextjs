@@ -1,17 +1,19 @@
 'use client';
 
-import { actions, useStore } from '@/store/rootStore';
+import { useStore } from '@/store/rootStore';
 
 export default function Counter() {
-  const count = useStore().counter.count();
+  const count = useStore((state) => state.count);
+  const increaseCount = useStore((state) => state.increase);
+  const decreaseCount = useStore((state) => state.decrease);
 
   // handle
   const handleIncrease = () => {
-    actions.counter.increase();
+    increaseCount();
   };
 
   const handleDecrease = () => {
-    actions.counter.decrease();
+    decreaseCount();
   };
 
   return (

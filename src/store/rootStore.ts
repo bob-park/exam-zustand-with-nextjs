@@ -1,13 +1,21 @@
-import { mapValuesKey } from 'zustand-x';
-import { useCounterStore } from './counter/slice';
-import { useUserStore } from './user/slice';
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 
-export const rootStore = {
-  counter: useCounterStore,
-  user: useUserStore,
-};
+import { createCounterSlice } from './counter/slice';
+import { createUserSlice } from './user/slice';
 
-export const useStore = () => mapValuesKey('use', rootStore);
+export const useStore = create<BoundState>()(
+  devtools(
+    persist(
+      immer((...a) => ({
+        ...createCounterSlice(...a),
+        ...createUserSlice(...a),
+      })),
+      { name: 'liveshorts-store' },
+    ),
+    { name: 'liveshorts-store' },
+  ),
+);
 
-export const store = mapValuesKey('get', rootStore);
-export const actions = mapValuesKey('set', rootStore);
+export type BoundState = UserState & CounterState;
