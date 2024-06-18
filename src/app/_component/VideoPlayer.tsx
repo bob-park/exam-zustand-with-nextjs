@@ -84,15 +84,15 @@ export default function VideoPlayer() {
           src="/test.mp4"
           onLoadedMetadataCapture={handleLoadedMetadata}
           onTimeUpdate={handleTimeUpdate}
-          onPause={() => {}}
-          onPlay={() => {}}
         />
       </div>
 
       <div>
         <div className="flex flex-row items-center justify-center">
-          <span className="mr-3">{toTimecode(currentFrameCount, FPS)}</span> /
-          <span className="ml-3"> {toTimecode(totalFrameCount, FPS)}</span>
+          <span className="mr-3 counter">
+            {toTimecode(currentFrameCount, FPS)}
+          </span>{' '}
+          /<span className="ml-3"> {toTimecode(totalFrameCount, FPS)}</span>
         </div>
       </div>
     </div>
