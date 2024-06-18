@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@dhmk/zustand-lens": "^4.0.0",
+    "canvas-txt": "^4.1.1",
     "daisyui": "^4.7.2",
     "immer": "^10.0.4",
     "next": "14.1.4",
