@@ -23,6 +23,8 @@ const pad = (num: number, size: number) => num.toString().padStart(size, '0');
 export default function VideoPlayer() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const [play, setPlay] = useState<boolean>(false);
+  const [oneFrameDuration, setOneFrameDuration] = useState<number>(0);
   const [currentFrameCount, setCurrentFrameCount] = useState<number>(0);
   const [totalFrameCount, setTotalFrameCount] = useState<number>(0);
 
@@ -37,10 +39,29 @@ export default function VideoPlayer() {
     videoRef.current?.load();
   }, []);
 
+  useEffect(() => {
+    let intervalId = null;
+
+    if (play) {
+      intervalId = setInterval(() => {
+        const curremtTime = videoRef.current?.currentTime || 0;
+
+        setCurrentFrameCount(curremtTime * FPS);
+      }, oneFrameDuration * 1000);
+    }
+
+    return () => {
+      intervalId && clearInterval(intervalId);
+    };
+  }, [play, oneFrameDuration]);
+
   // handle
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    setTotalFrameCount(e.currentTarget.duration * FPS);
+    const result = e.currentTarget.duration * FPS;
+
+    setTotalFrameCount(result);
     setCurrentFrameCount(0);
+    setOneFrameDuration(e.currentTarget.duration * (1 / result));
   };
 
   const handleTimeUpdate = (e: SyntheticEvent<HTMLVideoElement, Event>) => {
@@ -53,16 +74,16 @@ export default function VideoPlayer() {
     e.preventDefault();
 
     if (videoRef.current) {
-      const duration = videoRef.current.duration;
-
-      const oneFrameDuration = duration * (1 / totalFrameCount);
-
       if (e.key === 'ArrowRight') {
         videoRef.current.pause();
         videoRef.current.currentTime += oneFrameDuration;
+
+        setCurrentFrameCount(currentFrameCount + 1);
       } else if (e.key === 'ArrowLeft') {
         videoRef.current.pause();
         videoRef.current.currentTime -= oneFrameDuration;
+
+        setCurrentFrameCount(currentFrameCount - 1);
       } else if (e.key === ' ') {
         const paused = videoRef.current.paused;
         paused ? videoRef.current.play() : videoRef.current.pause();
@@ -83,7 +104,9 @@ export default function VideoPlayer() {
           id={VIDEO_TAG_ID}
           src="/test.mp4"
           onLoadedMetadataCapture={handleLoadedMetadata}
-          onTimeUpdate={handleTimeUpdate}
+          // onTimeUpdate={handleTimeUpdate}
+          onPlay={() => setPlay(true)}
+          onPause={() => setPlay(false)}
         />
       </div>
 
