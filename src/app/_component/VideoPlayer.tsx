@@ -61,7 +61,7 @@ export default function VideoPlayer() {
 
     setTotalFrameCount(result);
     setCurrentFrameCount(0);
-    setOneFrameDuration(e.currentTarget.duration * (1 / result));
+    setOneFrameDuration(1 / FPS);
   };
 
   const handleTimeUpdate = (e: SyntheticEvent<HTMLVideoElement, Event>) => {
