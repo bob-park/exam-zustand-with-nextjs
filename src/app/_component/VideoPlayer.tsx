@@ -30,12 +30,6 @@ export default function VideoPlayer() {
 
   // useEffect
   useEffect(() => {
-    const video = document.getElementById(VIDEO_TAG_ID) as HTMLVideoElement;
-
-    if (!video) {
-      return;
-    }
-
     videoRef.current?.load();
   }, []);
 
