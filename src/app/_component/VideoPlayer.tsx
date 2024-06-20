@@ -41,13 +41,21 @@ export default function VideoPlayer() {
         const curremtTime = videoRef.current?.currentTime || 0;
 
         setCurrentFrameCount(curremtTime * FPS);
-      }, oneFrameDuration * 1000);
+      }, 1_000 / 120);
+    } else {
+      const curremtTime = videoRef.current?.currentTime || 0;
+
+      setCurrentFrameCount(curremtTime * FPS);
     }
 
     return () => {
       intervalId && clearInterval(intervalId);
     };
-  }, [play, oneFrameDuration]);
+  }, [play]);
+
+  useEffect(() => {
+    console.log(currentFrameCount);
+  }, [currentFrameCount]);
 
   // handle
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
