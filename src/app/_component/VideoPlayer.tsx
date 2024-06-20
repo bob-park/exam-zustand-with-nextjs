@@ -5,17 +5,20 @@ import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 const FPS = 29.97;
 const VIDEO_TAG_ID = 'my_video';
 
-function toTimecode(currentFrameCount: number, fps: number): string {
+function toTimecode(
+  currentFrameCount: number,
+  fps: number,
+  isTimecode: boolean,
+): string {
   const totalSeconds = currentFrameCount / fps;
   const frame = Math.floor(currentFrameCount % fps);
   const seconds = Math.floor(totalSeconds % 60);
-  const minute = Math.floor((totalSeconds / 3600) % 60);
+  const minute = Math.floor((totalSeconds / 60) % 60);
   let hour = Math.floor(totalSeconds / 3600);
 
-  return `${pad(hour, 2)}:${pad(minute, 2)}:${pad(seconds, 2)};${pad(
-    frame,
-    2,
-  )}`;
+  return `${pad(hour, 2)}:${pad(minute, 2)}:${pad(seconds, 2)}${
+    isTimecode ? `;${pad(frame, 2)}` : ''
+  }`;
 }
 
 const pad = (num: number, size: number) => num.toString().padStart(size, '0');
@@ -41,21 +44,13 @@ export default function VideoPlayer() {
         const curremtTime = videoRef.current?.currentTime || 0;
 
         setCurrentFrameCount(curremtTime * FPS);
-      }, 1_000 / 120);
-    } else {
-      const curremtTime = videoRef.current?.currentTime || 0;
-
-      setCurrentFrameCount(curremtTime * FPS);
+      }, 10);
     }
 
     return () => {
       intervalId && clearInterval(intervalId);
     };
-  }, [play]);
-
-  useEffect(() => {
-    console.log(currentFrameCount);
-  }, [currentFrameCount]);
+  }, [play, oneFrameDuration]);
 
   // handle
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -102,22 +97,40 @@ export default function VideoPlayer() {
       <div className="h-96">
         <video
           className="size-full"
+          controls
           ref={videoRef}
           id={VIDEO_TAG_ID}
           src="/test.mp4"
           onLoadedMetadataCapture={handleLoadedMetadata}
-          // onTimeUpdate={handleTimeUpdate}
+          onTimeUpdate={handleTimeUpdate}
           onPlay={() => setPlay(true)}
           onPause={() => setPlay(false)}
         />
       </div>
-
+      <div>
+        <div className="flex flex-row items-center justify-center">
+          <span className="mr-3 counter">{Math.floor(currentFrameCount)}</span>/
+          <span className="ml-3">{Math.floor(totalFrameCount)}</span>
+        </div>
+      </div>
       <div>
         <div className="flex flex-row items-center justify-center">
           <span className="mr-3 counter">
-            {toTimecode(currentFrameCount, FPS)}
-          </span>{' '}
-          /<span className="ml-3"> {toTimecode(totalFrameCount, FPS)}</span>
+            {toTimecode(currentFrameCount, FPS, true)}
+          </span>
+          /
+          <span className="ml-3">{toTimecode(totalFrameCount, FPS, true)}</span>
+        </div>
+      </div>
+      <div>
+        <div className="flex flex-row items-center justify-center">
+          <span className="mr-3 counter">
+            {toTimecode(currentFrameCount, FPS, false)}
+          </span>
+          /
+          <span className="ml-3">
+            {toTimecode(totalFrameCount, FPS, false)}
+          </span>
         </div>
       </div>
     </div>
