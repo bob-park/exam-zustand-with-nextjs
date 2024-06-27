@@ -1,31 +1,23 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-
-import { toTimecode } from '@/utils/commonUtils';
-
-import { LogLevel } from 'dashjs';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { VideoPlayerContext } from './VideoPlayerProvider';
 
 type VideoPlayerProps = {
   src: string;
+  fps: number;
+  onPlay?: () => void;
+  onStop?: () => void;
+  onForward?: () => void;
+  onBackward?: () => void;
 };
 
-const DEFAULT_FPS = 29.97;
-
-function parseFrameCount(currentTime: number, currentFps?: number) {
-  const fps = currentFps || DEFAULT_FPS;
-
-  return currentTime * fps;
-}
-
-export default function VideoPlayer({ src }: VideoPlayerProps) {
+export default function VideoPlayer({ src, fps }: VideoPlayerProps) {
   // ref
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // state
-  const [play, setPlay] = useState<boolean>(false);
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(0);
+  // context
+  const { play, currentTime, setCurrentTime, setDuration, setPlay } =
+    useContext(VideoPlayerContext);
 
   // useEffect
   useEffect(() => {
@@ -38,7 +30,7 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
 
       const dashPlayer = dashjs.MediaPlayer().create();
 
-      dashPlayer.initialize(videoRef.current, src, true);
+      dashPlayer.initialize(videoRef.current, src, false);
       dashPlayer.updateSettings({
         debug: { logLevel: 0 },
       });
@@ -50,6 +42,14 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
 
     return () => {};
   }, [src]);
+
+  useEffect(() => {
+    if (!videoRef.current) {
+      return;
+    }
+
+    // videoRef.current.currentTime = currentTime;
+  }, [currentTime]);
 
   useEffect(() => {
     let intervalId = null;
@@ -73,25 +73,25 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
   };
 
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    // setCurrentTime(e.currentTarget.currentTime);
+    setCurrentTime(e.currentTarget.currentTime);
   };
 
   const handlePlayerKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     e.preventDefault();
 
-    const oneFrameDuration = 1 / DEFAULT_FPS;
+    const oneFrameDuration = 1 / fps;
 
     if (videoRef.current) {
       if (e.key === 'ArrowRight') {
         videoRef.current.pause();
         videoRef.current.currentTime += oneFrameDuration;
 
-        setCurrentTime(currentTime + oneFrameDuration);
+        setCurrentTime(videoRef.current.currentTime);
       } else if (e.key === 'ArrowLeft') {
         videoRef.current.pause();
         videoRef.current.currentTime -= oneFrameDuration;
 
-        setCurrentTime(currentTime - oneFrameDuration);
+        setCurrentTime(videoRef.current.currentTime);
       } else if (e.key === ' ') {
         const paused = videoRef.current.paused;
         paused ? videoRef.current.play() : videoRef.current.pause();
@@ -115,36 +115,6 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
           onPlay={() => setPlay(true)}
           onPause={() => setPlay(false)}
         />
-      </div>
-      <div>
-        <div className="flex flex-row items-center justify-center">
-          <span className="mr-3 counter">
-            {Math.floor(parseFrameCount(currentTime))}
-          </span>
-          /<span className="ml-3">{Math.floor(parseFrameCount(duration))}</span>
-        </div>
-      </div>
-      <div>
-        <div className="flex flex-row items-center justify-center">
-          <span className="mr-3 counter">
-            {toTimecode(currentTime, DEFAULT_FPS, true)}
-          </span>
-          /
-          <span className="ml-3">
-            {toTimecode(currentTime, DEFAULT_FPS, true)}
-          </span>
-        </div>
-      </div>
-      <div>
-        <div className="flex flex-row items-center justify-center">
-          <span className="mr-3 counter">
-            {toTimecode(currentTime, DEFAULT_FPS, false)}
-          </span>
-          /
-          <span className="ml-3">
-            {toTimecode(currentTime, DEFAULT_FPS, false)}
-          </span>
-        </div>
       </div>
     </div>
   );

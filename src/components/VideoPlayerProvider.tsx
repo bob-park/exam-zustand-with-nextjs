@@ -1,9 +1,11 @@
 import { createContext, useState } from 'react';
 
 export const VideoPlayerContext = createContext({
+  play: false,
   currentTime: 0,
   duration: 0,
-  onTimeUpdate: (currentTime: number) => {},
+  setPlay: (flag: boolean) => {},
+  setCurrentTime: (currentTime: number) => {},
   setDuration: (duration: number) => {},
 });
 
@@ -12,12 +14,20 @@ export default function VideoPlayerProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [currentTime, onTimeUpdate] = useState<number>(0);
+  const [play, setPlay] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
 
   return (
     <VideoPlayerContext.Provider
-      value={{ currentTime, duration, onTimeUpdate, setDuration }}
+      value={{
+        play,
+        currentTime,
+        duration,
+        setCurrentTime,
+        setDuration,
+        setPlay,
+      }}
     >
       {children}
     </VideoPlayerContext.Provider>
